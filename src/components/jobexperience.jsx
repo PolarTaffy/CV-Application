@@ -23,7 +23,7 @@ export default function JobSection() {
 
     const [experiences, setExperiences] = useState([Experience.blankExperience()]);
     if (interactionMode) {
-        curPanel = <EditJob setExperiences={setExperiences} experiences={experiences}/>
+        curPanel = <AddJob setExperiences={setExperiences} experiences={experiences}/>
         btnContent="Display Info";
     } else {
         curPanel = <DisplayJob experiences={experiences}/>
@@ -60,12 +60,45 @@ function DisplayJob({experiences}) {
 
 }
 
-function EditJob({experiences, setExperiences}) { //TOOD: Wrap div editContentBox in a box
+function EditCurrentJobs({experiences, setExperiences}) { 
+    return(<>
+    {experiences.map((experience) => {
+        if (experience.responsibilities.length == 0) {
+            return (<div key={experience.id} id="contentBox">
+                <p><b>{experience.jobTitle}, {experience.place}</b></p>
+                <p>{experience.startDate} - {experience.endDate}</p>
+
+                <button onClick={() => {
+                    let experienceArray = experiences.filter(exp => exp.id != experience.id);
+                    setExperiences(experienceArray);
+                }}>Remove Job</button>
+            </div>)
+        } else {
+            return <div key={experience.id} id="contentBox">
+                <p><b>{experience.jobTitle}, {experience.place}</b></p>
+                <p>{experience.startDate} - {experience.endDate}</p>
+                <ul> 
+                    {experience.responsibilities.map((responsibility, index) => {
+                        return responsibility.length != 0 ? <li>{responsibility}</li> : null;
+                    })}
+                </ul>
+                <button onClick={() => {
+                    experienceArray = experiences.filter(exp => exp.id != experience.id);
+                    setExperiences(experienceArray);
+                }}>Remove Job</button>
+            </div>
+        }
+    })}
+    </>)
+
+}
+
+function AddJob({experiences, setExperiences}) { //TOOD: Wrap div editContentBox in a box
     const [curExperience, setCurExperience] = useState(Experience.blankExperience());
 
     return(
         <>
-            <DisplayJob experiences={experiences} />
+            <EditCurrentJobs experiences={experiences} setExperiences={setExperiences}/>
             {/* This time around we're just going to be able to add new ones to avoid overwhelming ourselves. */}
             <br></br>
             <label>Company</label>
@@ -93,7 +126,14 @@ function EditJob({experiences, setExperiences}) { //TOOD: Wrap div editContentBo
             }}/>
 
             <button onClick={() => {
-                setExperiences(experiences.concat(Experience.copyExperience(curExperience)));
+                let newExp = Experience.copyExperience(curExperience)
+                if (experiences.some((element) => element.id == newExp.id)) {
+                    alert("You cannot add duplicate experience!");
+                } else {
+                    setExperiences(experiences.concat(newExp));
+                }
+
+                
             }}>Submit</button>
             
         </>
