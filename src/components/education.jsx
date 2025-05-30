@@ -6,7 +6,7 @@ class Experience {
         this.jobTitle = title
         this.startDate = start
         this.endDate = end
-        this.responsibilities = responsibilities
+        this.responsibilities = [...responsibilities]
         this.id = this.place + this.jobTitle + this.startDate + this.endDate + this.responsibilities.length;
     }
     static blankExperience() {
@@ -19,7 +19,7 @@ export default function EducationSection() {
     const [interactionMode, setInteractionMode] = useState(true); //true = edit mode, false = view mode
     let curPanel, btnContent
 
-    const [experiences, setExperiences] = useState([Experience.blankExperience(), Experience.blankExperience()]);
+    const [experiences, setExperiences] = useState([Experience.blankExperience()]);
     if (interactionMode) {
         curPanel = <EditEducation setExperiences={setExperiences} experiences={experiences}/>
         btnContent="Display Info";
@@ -64,7 +64,9 @@ function EditEducation({experiences, setExperiences}) { //TOOD: Wrap div editCon
             {experiences.map((experience) => {
                 let content = <>
                     <p>Company Name</p>
-                    <input type="text"></input>
+                    <input type="text" onChange={(event) => {
+                        
+                    }}></input>
 
                     <p>Job Title</p>
                     <input type="text"></input>
@@ -77,26 +79,51 @@ function EditEducation({experiences, setExperiences}) { //TOOD: Wrap div editCon
                 </>
                 //now we need to handle experience!
                 
-                return <div key={experience.id} id="editContainerBox">{content}{<ResponsibilityList experience={experience} setExperiences={setExperiences}/>}</div>
+                return <div key={experience.id} id="editContainerBox">
+                    {content}
+                    <br/>
+                    {<ResponsibilityList responsibilities={experience.responsibilities} experience={experience} experiences={experiences} setExperiences={setExperiences}/>}
+                    <br /> <br />
+                    <button>Save Experience</button>
+                    <hr/>
+                    </div>
             })}   
         </>
     )
 }
 
-function ResponsibilityList({experience, setExperiences}) {
+function ResponsibilityList({responsibilities, experience, experiences, setExperiences}) {
     //load the experiences current responsibilities
     let list = <>
-        {experience.responsibilities.map((responsibility) => {
+        <p>Responsibilities</p>
+        {responsibilities.map((responsibility) => {
             return <div key={responsibility}>
                 <label>{responsibility}</label>
                 <input type="button"></input>
             </div>
         })}
-
-
     </>
-    //for each experience 
+    let resp = "";
+    let addBox = <>
+        
+        <input type="input" onChange={(event) => {
+            resp = event.target.value;
+        }}/>
+        <button onClick={() => {
+            console.log(typeof(experiences))
+            let index = experiences.indexOf(experience);
+            let duties = [...responsibilities, {resp}];
+            let myExp = Experience.blankExperience(experience.place, experience.jobTitle, experience.startDate, experience.endDate, duties);
+            
+            console.log(`Index: ${index} \nDuties: ${duties.toString()}\nExperience: ${Object.values(myExp)}`)
+            let allExps = [...experiences];
+            allExps[index] = myExp;
 
-    //create box that creates a new thing, that always appears at the bottom, plus the button to add it
+            setExperiences(allExps);
+        }}>Add Responsibility</button>
+    </>
 
+    return <>
+        {list} {addBox}
+    </>
 }
